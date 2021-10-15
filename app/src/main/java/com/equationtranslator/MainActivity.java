@@ -4,10 +4,6 @@ import com.example.equationtranslator.databinding.ActivityMainBinding;
 import com.example.equationtranslator.R;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,9 +16,8 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import java.io.ByteArrayOutputStream;
@@ -34,12 +29,15 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     // for camera
-    private static int REQUEST_CAMERA = 0, SELECT_FILE = 1;
+    private static final int REQUEST_CAMERA = 0, SELECT_FILE = 1;
+
+    // screen elements
     private Button btnSelect;
     private ImageView ivImage;
+    private EditText outputEquation;
+
     private String userChosenTask;
 
-    private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
     @Override
@@ -55,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) { selectImage(); }
         });
         ivImage = (ImageView) findViewById(R.id.ivImage);
+        outputEquation = (EditText) findViewById(R.id.eqOutput);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 "Cancel" };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Add Photo!");
+        builder.setTitle("Take or select a photo of a handwritten equation");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
@@ -149,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ivImage.setImageBitmap(thumbnail);
+        outputEquation.setText(ModelInterface.processImage(thumbnail));
+
     }
 
   //  @SuppressWarnings("deprecation")
@@ -164,5 +165,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ivImage.setImageBitmap(bm);
+        outputEquation.setText(ModelInterface.processImage(bm));
     }
 }
