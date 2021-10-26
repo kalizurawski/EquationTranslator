@@ -1,5 +1,7 @@
 package com.equationtranslator;
 
+import com.chaquo.python.PyObject;
+import com.equationtranslator.view.MathView;
 import com.example.equationtranslator.databinding.ActivityMainBinding;
 import com.example.equationtranslator.R;
 
@@ -11,20 +13,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
+
+import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,8 +38,12 @@ public class MainActivity extends AppCompatActivity {
 
     // screen elements
     private Button btnSelect;
+    private Button btnCpy;
     private ImageView ivImage;
-    private EditText outputEquation;
+    private MathView outputEq;
+
+    // interfaces
+    private ModelInterface mi;
 
     private String userChosenTask;
 
@@ -44,16 +53,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // start python interpreter
+        if (!Python.isStarted()) {
+            Python.start(new AndroidPlatform(this));
+        }
+
+        // initialize instance class
+        mi = new ModelInterface();
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        btnSelect = (Button) findViewById(R.id.btnSelectPhoto);
-        btnSelect.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) { selectImage(); }
-        });
-        ivImage = (ImageView) findViewById(R.id.ivImage);
-        outputEquation = (EditText) findViewById(R.id.eqOutput);
+        setupButtons();
+
+        ivImage = findViewById(R.id.ivImage);
+        outputEq = findViewById(R.id.formula);
+        outputEq.setText("Waiting for input...");
+    }
+
+    private void setupButtons() {
+        btnSelect = findViewById(R.id.btnSelectPhoto);
+        btnSelect.setOnClickListener(v -> selectImage());
+
+        btnCpy = findViewById(R.id.btnCopy);
+        btnCpy.setOnClickListener(v -> copyFormula());
     }
 
     @Override
@@ -99,6 +122,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.show();
+    }
+
+    private void copyFormula()
+    {
+        Date now = new Date();
+        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+
+        File dir = getFilesDir(); // or getCacheDir()
+        if (!new File(dir + "/EquationTranslator").isDirectory()) {
+            if (!new File(dir + "/EquationTranslator").mkdir()) {
+                return;
+            }
+        }
+
+        dir = new File(dir + "/EquationTranslator/" + now.toString() + ".png");
+
+        try {
+            // create bitmap screen capture
+            View v1 = getWindow().getDecorView().getRootView();
+            v1.setDrawingCacheEnabled(true);
+            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+            v1.setDrawingCacheEnabled(false);
+
+            // compress and save
+            FileOutputStream fileOutputStream = new FileOutputStream(dir);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+            fileOutputStream.close();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openScreenshot(File imageFile) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        Uri uri = Uri.fromFile(imageFile);
+        intent.setDataAndType(uri, "image/*");
+        startActivity(intent);
     }
 
     private void galleryIntent()
@@ -148,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ivImage.setImageBitmap(thumbnail);
-        outputEquation.setText(ModelInterface.processImage(thumbnail));
+        outputEq.setText(mi.processImage(thumbnail));
 
     }
 
@@ -165,6 +226,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ivImage.setImageBitmap(bm);
-        outputEquation.setText(ModelInterface.processImage(bm));
+        String latex = mi.processImage(bm);
+        outputEq.setText(latex);
+        System.out.println(latex);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }

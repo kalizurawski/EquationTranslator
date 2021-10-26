@@ -9,17 +9,17 @@
         android:id="@+id/btnSelectPhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="175dp"
+        android:layout_marginBottom="272dp"
         android:text="@string/select_photo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/ivImage"
-        android:layout_width="359dp"
-        android:layout_height="400dp"
+        android:layout_width="309dp"
+        android:layout_height="339dp"
         android:layout_marginTop="40dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,19 +27,38 @@
         tools:ignore="ImageContrastCheck"
         tools:srcCompat="@tools:sample/avatars" />
 
-    <EditText
+    <TextView
         android:id="@+id/eqOutput"
-        android:layout_width="312dp"
-        android:layout_height="99dp"
-        android:layout_marginBottom="47dp"
+        android:layout_width="184dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="228dp"
         android:ems="10"
-        android:gravity="start|top"
         android:inputType="none"
         android:text="@string/output_equation"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <com.equationtranslator.view.MathView
+        android:id="@+id/formula"
+        android:layout_width="239dp"
+        android:layout_height="115dp"
+        android:layout_marginStart="41dp"
+        android:layout_marginBottom="80dp"
+        android:clickable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnCopy"
+        android:layout_width="101dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="110dp"
+        android:text="Copy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
