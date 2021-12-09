@@ -1,6 +1,5 @@
 package com.equationtranslator;
 
-import com.chaquo.python.PyObject;
 import com.equationtranslator.view.MathView;
 import com.example.equationtranslator.databinding.ActivityMainBinding;
 import com.example.equationtranslator.R;
@@ -9,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,6 +33,9 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
+    // context
+    public Context context;
+
     // for camera
     private static final int REQUEST_CAMERA = 0, SELECT_FILE = 1;
 
@@ -54,12 +57,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // start python interpreter
-        if (!Python.isStarted()) {
-            Python.start(new AndroidPlatform(this));
-        }
+//        if (!Python.isStarted()) {
+//            Python.start(new AndroidPlatform(this));
+//        }
+
+        // initialize context
+        context = getApplicationContext();
 
         // initialize instance class
-        mi = new ModelInterface();
+        mi = new ModelInterface(context);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -74,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private void setupButtons() {
         btnSelect = findViewById(R.id.btnSelectPhoto);
         btnSelect.setOnClickListener(v -> selectImage());
-
-        btnCpy = findViewById(R.id.btnCopy);
-        btnCpy.setOnClickListener(v -> copyFormula());
     }
 
     @Override
@@ -191,25 +194,28 @@ public class MainActivity extends AppCompatActivity {
     private void onCaptureImageResult(Intent data) {
         Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
 
-        File destination = new File(Environment.getExternalStorageDirectory(),
-                System.currentTimeMillis() + ".jpg");
+//        File destination = new File(Environment.getExternalStorageDirectory(),
+//                System.currentTimeMillis() + ".jpg");
+//
+//        FileOutputStream fo;
+//        try {
+//            destination.createNewFile();
+//            fo = new FileOutputStream(destination);
+//            fo.write(bytes.toByteArray());
+//            fo.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        FileOutputStream fo;
-        try {
-            destination.createNewFile();
-            fo = new FileOutputStream(destination);
-            fo.write(bytes.toByteArray());
-            fo.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        System.out.println("Compressed image into jpeg to display");
         ivImage.setImageBitmap(thumbnail);
+        System.out.println("Displayed thumbnail");
         outputEq.setText(mi.processImage(thumbnail));
+        System.out.println("Completed task");
 
     }
 
@@ -226,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ivImage.setImageBitmap(bm);
-        String latex = mi.processImage(bm);
+        String latex = "$" + mi.processImage(bm) + "$";
         outputEq.setText(latex);
         System.out.println(latex);
     }
